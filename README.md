@@ -156,18 +156,38 @@ Categories are stored in JSON format at:
 Example:
 ```json
 [
-  {
-    "Name": "Resume",
-    "Description": "Resume and CV files",
-    "CreatedAt": "2025-11-15T10:30:00"
-  },
-  {
-    "Name": "IDProof",
-    "Description": "Identity and legal documents",
-    "CreatedAt": "2025-11-15T10:32:00"
-  }
+   {
+      "Name": "Resume",
+      "Description": "Resume and CV files",
+      "CreatedAt": "2025-11-15T10:30:00"
+   },
+   {
+      "Name": "IDProof",
+      "Description": "Identity and legal documents",
+      "CreatedAt": "2025-11-15T10:32:00"
+   }
 ]
 ```
+
+### Source/Output Folder Path Persistence
+
+Source folders and output folder are automatically saved and loaded at startup, similar to categories. These paths are stored in:
+```
+~/.config/TidyFile/appconfig.json
+```
+
+Example:
+```json
+{
+   "SourceFolders": [
+      "/home/user/Documents",
+      "/home/user/Downloads"
+   ],
+   "OutputFolder": "/home/user/Organized"
+}
+```
+
+You can change these paths via the interactive menu. Changes are persisted automatically and restored on next launch.
 
 ### Logs
 

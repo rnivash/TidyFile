@@ -29,7 +29,13 @@ services.AddLogging(config =>
 
 services.AddScoped<IFileService, FileService>();
 services.AddScoped<ICategoryService, CategoryService>();
-services.AddScoped<ApplicationUI>();
+services.AddScoped<AppConfigService>();
+services.AddScoped<ApplicationUI>(sp =>
+    new ApplicationUI(
+        sp.GetRequiredService<IFileService>(),
+        sp.GetRequiredService<ICategoryService>(),
+        sp.GetRequiredService<AppConfigService>(),
+        sp.GetRequiredService<ILogger<ApplicationUI>>()));
 
 var serviceProvider = services.BuildServiceProvider();
 

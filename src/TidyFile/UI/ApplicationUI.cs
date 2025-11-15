@@ -4,6 +4,7 @@ using Spectre.Console;
 using TidyFile.Interfaces;
 using TidyFile.Models;
 using Microsoft.Extensions.Logging;
+using TidyFile.Services;
 
 /// <summary>
 /// Main application UI controller using Spectre.Console for interactive experience.
@@ -12,15 +13,17 @@ public class ApplicationUI
 {
     private readonly IFileService _fileService;
     private readonly ICategoryService _categoryService;
+    private readonly AppConfigService _appConfigService;
     private readonly ILogger<ApplicationUI> _logger;
     private List<FileItem> _discoveredFiles = new();
     private List<string> _sourceFolders = new();
     private string _outputFolder = string.Empty;
 
-    public ApplicationUI(IFileService fileService, ICategoryService categoryService, ILogger<ApplicationUI> logger)
+    public ApplicationUI(IFileService fileService, ICategoryService categoryService, AppConfigService appConfigService, ILogger<ApplicationUI> logger)
     {
         _fileService = fileService;
         _categoryService = categoryService;
+        _appConfigService = appConfigService;
         _logger = logger;
     }
 
@@ -29,8 +32,13 @@ public class ApplicationUI
         AnsiConsole.MarkupLine("[bold blue]Welcome to TidyFile - File Organization System[/]");
         AnsiConsole.MarkupLine("[dim]Organize your files into custom categories[/]\n");
 
-        // Load existing categories
-        await _categoryService.LoadCategoriesAsync();
+    // Load existing categories
+    await _categoryService.LoadCategoriesAsync();
+    // Load persisted source/output folders
+    await _appConfigService.LoadConfigAsync();
+    var config = _appConfigService.GetConfig();
+    _sourceFolders = config.SourceFolders ?? new List<string>();
+    _outputFolder = config.OutputFolder ?? string.Empty;
 
         while (true)
         {
@@ -113,6 +121,8 @@ public class ApplicationUI
                 {
                     _sourceFolders.Add(folderPath);
                     AnsiConsole.MarkupLine($"[green]✓ Added: {folderPath}[/]\n");
+                    _appConfigService.SetSourceFolders(_sourceFolders);
+                    await _appConfigService.SaveConfigAsync();
                 }
                 else
                 {
@@ -141,6 +151,8 @@ public class ApplicationUI
             else if (choice == "Clear All")
             {
                 _sourceFolders.Clear();
+                _appConfigService.SetSourceFolders(_sourceFolders);
+                await _appConfigService.SaveConfigAsync();
                 AnsiConsole.MarkupLine("[green]✓ All folders cleared![/]\n");
             }
             else if (choice == "Done")
@@ -170,6 +182,8 @@ public class ApplicationUI
                 Directory.CreateDirectory(folderPath);
             }
             _outputFolder = folderPath;
+            _appConfigService.SetOutputFolder(_outputFolder);
+            _appConfigService.SaveConfigAsync().Wait();
             AnsiConsole.MarkupLine($"[green]✓ Output folder set to: {_outputFolder}[/]\n");
         }
         catch (Exception ex)
