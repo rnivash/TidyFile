@@ -11,10 +11,12 @@ using Microsoft.Extensions.Logging;
 public class FileService : IFileService
 {
     private readonly ILogger<FileService> _logger;
+    private readonly CopiedFilesTrackerService _trackerService;
 
-    public FileService(ILogger<FileService> logger)
+    public FileService(ILogger<FileService> logger, CopiedFilesTrackerService trackerService)
     {
         _logger = logger;
+        _trackerService = trackerService;
     }
 
     public async Task<List<FileItem>> DiscoverFilesAsync(List<string> sourceFolders)
@@ -38,6 +40,13 @@ public class FileService : IFileService
 
                     foreach (var fileInfo in fileInfos)
                     {
+                        // Skip files that have already been copied
+                        if (_trackerService.IsFileCopied(fileInfo.FullName))
+                        {
+                            _logger.LogDebug("Skipping already-copied file: {FilePath}", fileInfo.FullName);
+                            continue;
+                        }
+
                         var fileItem = new FileItem
                         {
                             FilePath = fileInfo.FullName,
@@ -146,6 +155,9 @@ public class FileService : IFileService
                     File.Copy(file.FilePath, destinationPath, true);
                     File.SetCreationTime(destinationPath, file.CreatedAt);
                     File.SetLastWriteTime(destinationPath, file.ModifiedAt);
+
+                    // Track the copied file to exclude it from future discoveries
+                    _trackerService.AddCopiedFile(file.FilePath, destinationPath, file.AssignedCategory!);
 
                     result.FilesCopied++;
                     result.TotalBytesCopied += file.SizeBytes;

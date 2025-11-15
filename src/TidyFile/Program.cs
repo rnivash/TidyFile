@@ -27,6 +27,7 @@ services.AddLogging(config =>
     config.AddSerilog();
 });
 
+services.AddScoped<CopiedFilesTrackerService>();
 services.AddScoped<IFileService, FileService>();
 services.AddScoped<ICategoryService, CategoryService>();
 services.AddScoped<AppConfigService>();
@@ -35,15 +36,23 @@ services.AddScoped<ApplicationUI>(sp =>
         sp.GetRequiredService<IFileService>(),
         sp.GetRequiredService<ICategoryService>(),
         sp.GetRequiredService<AppConfigService>(),
+        sp.GetRequiredService<CopiedFilesTrackerService>(),
         sp.GetRequiredService<ILogger<ApplicationUI>>()));
 
 var serviceProvider = services.BuildServiceProvider();
 
 try
 {
+    // Load tracking data on startup
+    var trackerService = serviceProvider.GetRequiredService<CopiedFilesTrackerService>();
+    await trackerService.LoadTrackingDataAsync();
+
     // For now, run in interactive mode (batch mode can be added later)
     var ui = serviceProvider.GetRequiredService<ApplicationUI>();
     await ui.RunAsync();
+
+    // Save tracking data on exit
+    await trackerService.SaveTrackingDataAsync();
 }
 catch (Exception ex)
 {

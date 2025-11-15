@@ -9,10 +9,17 @@ namespace TidyFile.Tests;
 public class FileServiceTests
 {
     private readonly Mock<ILogger<FileService>> _mockLogger;
+    private readonly Mock<ILogger<CopiedFilesTrackerService>> _mockTrackerLogger;
 
     public FileServiceTests()
     {
         _mockLogger = new Mock<ILogger<FileService>>();
+        _mockTrackerLogger = new Mock<ILogger<CopiedFilesTrackerService>>();
+    }
+
+    private CopiedFilesTrackerService CreateTrackerService()
+    {
+        return new CopiedFilesTrackerService(_mockTrackerLogger.Object);
     }
 
     [Fact]
@@ -26,7 +33,8 @@ public class FileServiceTests
         File.WriteAllText(Path.Combine(tempDir, "file1.txt"), "content1");
         File.WriteAllText(Path.Combine(tempDir, "file2.txt"), "content2");
 
-        var service = new FileService(_mockLogger.Object);
+        var trackerService = CreateTrackerService();
+        var service = new FileService(_mockLogger.Object, trackerService);
 
         try
         {
@@ -50,7 +58,8 @@ public class FileServiceTests
     {
         // Arrange
         var nonExistentFolder = Path.Combine(Path.GetTempPath(), $"nonexistent_{Guid.NewGuid()}");
-        var service = new FileService(_mockLogger.Object);
+        var trackerService = CreateTrackerService();
+        var service = new FileService(_mockLogger.Object, trackerService);
 
         // Act
         var files = await service.DiscoverFilesAsync(new List<string> { nonExistentFolder });
@@ -71,7 +80,8 @@ public class FileServiceTests
         File.WriteAllText(Path.Combine(tempDir1, "file1.txt"), "content1");
         File.WriteAllText(Path.Combine(tempDir2, "file2.txt"), "content2");
 
-        var service = new FileService(_mockLogger.Object);
+        var trackerService = CreateTrackerService();
+        var service = new FileService(_mockLogger.Object, trackerService);
 
         try
         {
@@ -95,7 +105,8 @@ public class FileServiceTests
         var tempFile = Path.Combine(Path.GetTempPath(), $"test_{Guid.NewGuid()}.txt");
         File.WriteAllText(tempFile, "test content");
 
-        var service = new FileService(_mockLogger.Object);
+        var trackerService = CreateTrackerService();
+        var service = new FileService(_mockLogger.Object, trackerService);
 
         try
         {
@@ -118,7 +129,8 @@ public class FileServiceTests
     {
         // Arrange
         var nonExistentFile = Path.Combine(Path.GetTempPath(), $"nonexistent_{Guid.NewGuid()}.txt");
-        var service = new FileService(_mockLogger.Object);
+        var trackerService = CreateTrackerService();
+        var service = new FileService(_mockLogger.Object, trackerService);
 
         // Act
         var metadata = await service.GetFileMetadataAsync(nonExistentFile);
@@ -150,7 +162,8 @@ public class FileServiceTests
             AssignedCategory = "TestCategory"
         };
 
-        var service = new FileService(_mockLogger.Object);
+        var trackerService = CreateTrackerService();
+        var service = new FileService(_mockLogger.Object, trackerService);
         var progress = new Progress<(int, int, string)>();
 
         try
@@ -181,7 +194,8 @@ public class FileServiceTests
         var outputDir = Path.Combine(Path.GetTempPath(), $"output_{Guid.NewGuid()}");
         Directory.CreateDirectory(outputDir);
 
-        var service = new FileService(_mockLogger.Object);
+        var trackerService = CreateTrackerService();
+        var service = new FileService(_mockLogger.Object, trackerService);
         var progress = new Progress<(int, int, string)>();
 
         var unclassifiedFile = new FileItem
@@ -237,7 +251,8 @@ public class FileServiceTests
             AssignedCategory = "TestCategory"
         };
 
-        var service = new FileService(_mockLogger.Object);
+        var trackerService = CreateTrackerService();
+        var service = new FileService(_mockLogger.Object, trackerService);
         var progress = new Progress<(int, int, string)>();
 
         try

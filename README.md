@@ -14,7 +14,9 @@ A powerful .NET 8 console application for organizing and classifying files from 
 - ✅ Real-time file list updates after classification
 - 📈 Progress indicators during copy operations
 - 💾 Category persistence to JSON
-- 📝 Comprehensive logging with Serilog
+- � Automatic tracking of copied files (prevents re-processing)
+- 🔄 Folder path persistence across sessions
+- �📝 Comprehensive logging with Serilog
 
 ✨ **UI Features**:
 - 🎨 Interactive menu-driven console experience with Spectre.Console
@@ -188,6 +190,39 @@ Example:
 ```
 
 You can change these paths via the interactive menu. Changes are persisted automatically and restored on next launch.
+
+### Copied Files Tracking
+
+Once files are copied to the output folder, they are automatically tracked and excluded from future file discoveries. This prevents already-processed files from reappearing in the file list after app restarts.
+
+Tracking data is stored in:
+```
+~/.config/TidyFile/copiedfiles.json
+```
+
+Example:
+```json
+[
+  {
+    "SourceFilePath": "/home/user/Documents/resume.pdf",
+    "DestinationFilePath": "/home/user/Organized/Resume/resume.pdf",
+    "Category": "Resume",
+    "CopiedAt": "2025-11-15T10:45:00Z"
+  },
+  {
+    "SourceFilePath": "/home/user/Downloads/photo.jpg",
+    "DestinationFilePath": "/home/user/Organized/Photos/photo.jpg",
+    "Category": "Photos",
+    "CopiedAt": "2025-11-15T10:46:00Z"
+  }
+]
+```
+
+**Benefits**:
+- Files are never re-processed in subsequent sessions
+- Clean file list showing only remaining files
+- Automatic exclusion based on source file path
+- Full audit trail of copied files
 
 ### Logs
 

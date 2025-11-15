@@ -14,16 +14,18 @@ public class ApplicationUI
     private readonly IFileService _fileService;
     private readonly ICategoryService _categoryService;
     private readonly AppConfigService _appConfigService;
+    private readonly CopiedFilesTrackerService _trackerService;
     private readonly ILogger<ApplicationUI> _logger;
     private List<FileItem> _discoveredFiles = new();
     private List<string> _sourceFolders = new();
     private string _outputFolder = string.Empty;
 
-    public ApplicationUI(IFileService fileService, ICategoryService categoryService, AppConfigService appConfigService, ILogger<ApplicationUI> logger)
+    public ApplicationUI(IFileService fileService, ICategoryService categoryService, AppConfigService appConfigService, CopiedFilesTrackerService trackerService, ILogger<ApplicationUI> logger)
     {
         _fileService = fileService;
         _categoryService = categoryService;
         _appConfigService = appConfigService;
+        _trackerService = trackerService;
         _logger = logger;
     }
 
@@ -567,6 +569,9 @@ public class ApplicationUI
             {
                 _discoveredFiles.Remove(file);
             }
+
+            // Save the tracking data
+            await _trackerService.SaveTrackingDataAsync();
 
             AnsiConsole.MarkupLine($"[dim]Remaining files in list: {_discoveredFiles.Count}[/]\n");
         }
