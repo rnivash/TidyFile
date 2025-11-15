@@ -1,0 +1,65 @@
+# Build and binary files
+bin/
+obj/
+*.dll
+*.pdb
+*.exe
+*.so
+*.dylib
+
+# User-specific files
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+
+# NuGet
+*.nupkg
+*.nuget.props
+*.nuget.targets
+packages/
+.nuget/
+
+# Local environment
+.env
+.env.local
+
+# IDE
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+Logs/
+
+# Application config
+.config/
+.config/TidyFile/
+
+# Test Results
+TestResults/
+coverage/
+
+# Rider
+.idea/
+*.sln.iml
+
+# VS Code
+.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
