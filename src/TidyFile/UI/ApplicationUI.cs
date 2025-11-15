@@ -165,30 +165,74 @@ public class ApplicationUI
     private void SelectOutputFolder()
     {
         AnsiConsole.MarkupLine("[bold]Select Output Folder[/]\n");
-        AnsiConsole.MarkupLine("[yellow]Enter output folder path:[/]");
-        var folderPath = Console.ReadLine();
 
-        if (string.IsNullOrWhiteSpace(folderPath))
+        while (true)
         {
-            AnsiConsole.MarkupLine("[red]Invalid path![/]");
-            return;
-        }
-
-        // Create folder if it doesn't exist
-        try
-        {
-            if (!Directory.Exists(folderPath))
+            var choices = new List<string> { "Set Output Folder", "View Current Output Folder" };
+            if (!string.IsNullOrEmpty(_outputFolder))
             {
-                Directory.CreateDirectory(folderPath);
+                choices.Add("Back (Keep Current)");
             }
-            _outputFolder = folderPath;
-            _appConfigService.SetOutputFolder(_outputFolder);
-            _appConfigService.SaveConfigAsync().Wait();
-            AnsiConsole.MarkupLine($"[green]✓ Output folder set to: {_outputFolder}[/]\n");
-        }
-        catch (Exception ex)
-        {
-            AnsiConsole.MarkupLine($"[red]Error setting output folder: {ex.Message}[/]\n");
+            else
+            {
+                choices.Add("Back");
+            }
+
+            var choice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Output Folder Options")
+                    .AddChoices(choices));
+
+            if (choice == "Set Output Folder")
+            {
+                AnsiConsole.MarkupLine("\n[yellow]Enter output folder path (or 'cancel' to go back):[/]");
+                var folderPath = Console.ReadLine();
+
+                if (folderPath?.Equals("cancel", StringComparison.OrdinalIgnoreCase) == true)
+                    continue;
+
+                if (string.IsNullOrWhiteSpace(folderPath))
+                {
+                    AnsiConsole.MarkupLine("[red]Invalid path![/]\n");
+                    continue;
+                }
+
+                // Create folder if it doesn't exist
+                try
+                {
+                    if (!Directory.Exists(folderPath))
+                    {
+                        Directory.CreateDirectory(folderPath);
+                    }
+                    _outputFolder = folderPath;
+                    _appConfigService.SetOutputFolder(_outputFolder);
+                    _appConfigService.SaveConfigAsync().Wait();
+                    AnsiConsole.MarkupLine($"[green]✓ Output folder set to: {_outputFolder}[/]\n");
+                }
+                catch (Exception ex)
+                {
+                    AnsiConsole.MarkupLine($"[red]Error setting output folder: {ex.Message}[/]\n");
+                }
+            }
+            else if (choice == "View Current Output Folder")
+            {
+                if (string.IsNullOrEmpty(_outputFolder))
+                {
+                    AnsiConsole.MarkupLine("[yellow]No output folder selected yet.[/]\n");
+                }
+                else
+                {
+                    var table = new Table();
+                    table.AddColumn("[bold]Output Folder Path[/]");
+                    table.AddRow(_outputFolder);
+                    AnsiConsole.Write(table);
+                    Console.WriteLine();
+                }
+            }
+            else if (choice.StartsWith("Back"))
+            {
+                break;
+            }
         }
     }
 
